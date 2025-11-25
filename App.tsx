@@ -149,7 +149,7 @@ function App() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    const fileName = `reporte_munitrack_${new Date().toISOString().slice(0,10)}.csv`;
+    const fileName = `reporte_hacertrack_${new Date().toISOString().slice(0,10)}.csv`;
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
@@ -210,7 +210,7 @@ function App() {
                 </svg>
              </div>
              <div>
-               <h1 className="text-xl font-bold text-gray-900 tracking-tight">MuniTrack</h1>
+               <h1 className="text-xl font-bold text-gray-900 tracking-tight">HacerTrack</h1>
                <p className="text-xs text-gray-500 font-medium">Gestión de Desarrollo Municipal</p>
              </div>
           </div>
