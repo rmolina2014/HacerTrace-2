@@ -5,11 +5,15 @@ import CreateTicketModal from './components/CreateTicketModal';
 import ArchitectureModal from './components/ArchitectureModal';
 import AdminModal from './components/AdminModal';
 import StatsModal from './components/StatsModal';
+import LoginScreen from './components/LoginScreen';
 import { INITIAL_TICKETS, INITIAL_PROJECTS, INITIAL_MODULES_BY_PROJECT, INITIAL_USERS } from './constants';
 import { Ticket, Status, Module, Priority, User } from './types';
 import { analyzeBacklog } from './services/geminiService';
 
 function App() {
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
   // Data State
   const [tickets, setTickets] = useState<Ticket[]>(INITIAL_TICKETS);
   const [projects, setProjects] = useState<string[]>(INITIAL_PROJECTS);
@@ -101,6 +105,7 @@ function App() {
         ...ticketData as Ticket,
         id: `T-${(tickets.length + 1).toString().padStart(3, '0')}`,
         createdAt: new Date().toLocaleDateString('es-ES'),
+        // If logged in, maybe auto-assign creator? For now we just create it.
       };
       setTickets(prev => [...prev, newTicket]);
     }
@@ -197,6 +202,10 @@ function App() {
     setUsers(prev => prev.filter(u => u.id !== id));
   };
 
+  // If not logged in, show login screen
+  if (!currentUser) {
+    return <LoginScreen users={users} onLogin={setCurrentUser} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-gray-800 bg-slate-50">
@@ -216,6 +225,24 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* User Info & Logout */}
+            <div className="hidden lg:flex items-center gap-2 mr-2 px-3 py-1 bg-gray-50 rounded-full border border-gray-100">
+               <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+                 {currentUser.name.charAt(0)}
+               </div>
+               <span className="text-sm font-medium text-gray-700">{currentUser.name}</span>
+            </div>
+            
+            <button 
+                onClick={() => setCurrentUser(null)}
+                className="text-gray-500 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors"
+                title="Cerrar Sesión"
+            >
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+
+            <div className="h-6 w-px bg-gray-300 mx-1 hidden lg:block"></div>
+
             <button 
                 onClick={() => setIsAdminModalOpen(true)}
                 className="hidden lg:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
