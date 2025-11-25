@@ -4,6 +4,7 @@ import TicketCard from './components/TicketCard';
 import CreateTicketModal from './components/CreateTicketModal';
 import ArchitectureModal from './components/ArchitectureModal';
 import AdminModal from './components/AdminModal';
+import StatsModal from './components/StatsModal';
 import { INITIAL_TICKETS, INITIAL_PROJECTS, INITIAL_MODULES_BY_PROJECT, INITIAL_USERS } from './constants';
 import { Ticket, Status, Module, Priority, User } from './types';
 import { analyzeBacklog } from './services/geminiService';
@@ -19,6 +20,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isArchModalOpen, setIsArchModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [filterModule, setFilterModule] = useState<string>('All');
@@ -126,6 +128,34 @@ function App() {
     setIsAnalyzing(false);
   };
 
+  const handleDownloadCSV = () => {
+    const headers = ['ID', 'Proyecto', 'Módulo', 'Título', 'Descripción', 'Estado', 'Prioridad', 'Asignado', 'Fecha Creación'];
+    const rows = filteredTickets.map(t => [
+      t.id,
+      t.project,
+      t.module,
+      `"${t.title.replace(/"/g, '""')}"`, // Escape quotes
+      `"${t.description.replace(/"/g, '""')}"`,
+      t.status,
+      t.priority,
+      t.assignee || 'Sin asignar',
+      t.createdAt
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n" 
+      + rows.map(e => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    const fileName = `reporte_munitrack_${new Date().toISOString().slice(0,10)}.csv`;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // --- Handlers: Admin (ABM) ---
   const handleAddProject = (name: string) => {
     if (!projects.includes(name)) {
@@ -136,7 +166,6 @@ function App() {
 
   const handleDeleteProject = (name: string) => {
     setProjects(prev => prev.filter(p => p !== name));
-    // Optional: remove from modulesByProject too, or keep it as orphan
     const newModules = { ...modulesByProject };
     delete newModules[name];
     setModulesByProject(newModules);
@@ -190,17 +219,29 @@ function App() {
             <button 
                 onClick={() => setIsAdminModalOpen(true)}
                 className="hidden lg:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                title="Configuración"
             >
                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-               Configuración
             </button>
+            <div className="h-6 w-px bg-gray-300 mx-1 hidden lg:block"></div>
+            
             <button 
-                onClick={() => setIsArchModalOpen(true)}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
+                onClick={handleDownloadCSV}
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
+                title="Descargar Reporte (CSV)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>
-              Ver Propuesta
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Reporte
             </button>
+            
+            <button 
+                onClick={() => setIsStatsModalOpen(true)}
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              Estadísticas
+            </button>
+
             <button 
               onClick={() => { setEditingTicket(null); setIsModalOpen(true); }}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-blue-700 transition-all active:scale-95"
@@ -467,6 +508,12 @@ function App() {
         users={users}
         onAddUser={handleAddUser}
         onDeleteUser={handleDeleteUser}
+      />
+
+      <StatsModal 
+        isOpen={isStatsModalOpen}
+        onClose={() => setIsStatsModalOpen(false)}
+        tickets={tickets}
       />
     </div>
   );
