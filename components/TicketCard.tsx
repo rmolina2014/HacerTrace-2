@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Ticket, Priority } from '../types';
 
@@ -5,6 +6,7 @@ interface TicketCardProps {
   ticket: Ticket;
   onEdit: (ticket: Ticket) => void;
   onMove: (ticket: Ticket, direction: 'next' | 'prev') => void;
+  onViewImage?: (imageUrl: string) => void;
 }
 
 const getPriorityColor = (p: Priority) => {
@@ -17,25 +19,40 @@ const getPriorityColor = (p: Priority) => {
   }
 };
 
-const TicketCard: React.FC<TicketCardProps> = ({ ticket, onEdit, onMove }) => {
+const TicketCard: React.FC<TicketCardProps> = ({ ticket, onEdit, onMove, onViewImage }) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 group relative">
-      <div className="flex justify-between items-start mb-2">
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 group relative flex flex-col gap-2">
+      <div className="flex justify-between items-start">
         <span className="text-xs font-mono text-gray-500 font-bold">{ticket.id}</span>
         <span className={`text-xs px-2 py-0.5 rounded-full border ${getPriorityColor(ticket.priority)} font-medium`}>
           {ticket.priority}
         </span>
       </div>
       
-      <h3 className="text-sm font-semibold text-gray-900 mb-2 leading-tight">
+      <h3 className="text-sm font-semibold text-gray-900 leading-tight">
         {ticket.title}
       </h3>
       
-      <p className="text-xs text-gray-500 line-clamp-2 mb-3">
+      <p className="text-xs text-gray-500 line-clamp-2">
         {ticket.description}
       </p>
 
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+      {/* Attachments Preview */}
+      {ticket.attachments && ticket.attachments.length > 0 && (
+        <div className="flex gap-1 mt-1 overflow-x-auto pb-1">
+          {ticket.attachments.map((img, idx) => (
+            <div 
+              key={idx} 
+              className="w-8 h-8 rounded border border-gray-200 overflow-hidden shrink-0 cursor-pointer hover:opacity-80"
+              onClick={(e) => { e.stopPropagation(); onViewImage && onViewImage(img); }}
+            >
+              <img src={img} alt="attachment" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mt-1 pt-2 border-t border-gray-100">
         <div className="flex items-center space-x-2">
           <span className="text-[10px] uppercase tracking-wider text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
             {ticket.module}

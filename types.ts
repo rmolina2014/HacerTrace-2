@@ -1,3 +1,4 @@
+
 export enum Priority {
   Low = 'Baja',
   Medium = 'Media',
@@ -38,11 +39,12 @@ export interface Ticket {
   project: string; 
   title: string;
   description: string;
-  module: string; // Changed from Module enum to string to support dynamic ABM
+  module: string; 
   priority: Priority;
   status: Status;
   assignee?: string; 
   createdAt: string; 
+  attachments: string[]; // Array of Base64 image strings
 }
 
 export interface BoardColumn {

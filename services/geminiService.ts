@@ -1,17 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { Ticket } from "../types";
 
-// This is a mock service for demonstration if no API key is present, 
-// but fully functional if the key is provided in env.
-
-const getAIClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) return null;
-  return new GoogleGenAI({ apiKey });
-};
-
 export const analyzeBacklog = async (tickets: Ticket[]): Promise<string> => {
-  const ai = getAIClient();
+  // According to guidelines, API key must be obtained exclusively from process.env.API_KEY
+  const apiKey = process.env.API_KEY;
   
   // Filter for relevant tickets to save tokens context
   const pendingTickets = tickets.filter(t => t.status !== 'Terminado' && t.status !== 'Mejora Futura');
@@ -34,12 +26,12 @@ export const analyzeBacklog = async (tickets: Ticket[]): Promise<string> => {
     Mantén el tono profesional, conciso y utiliza formato Markdown para estructurar la respuesta.
   `;
 
-  if (!ai) {
+  if (!apiKey) {
     // Fallback simulation if no API key
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(`
-### Análisis de Backlog (Simulado)
+### Análisis de Backlog (Simulado - Sin API Key)
 
 **1. Cuellos de Botella Críticos:**
 *   **Nichos - Datos faltantes (Alta):** Afecta la integridad de los registros de pago.
@@ -59,6 +51,7 @@ export const analyzeBacklog = async (tickets: Ticket[]): Promise<string> => {
   }
 
   try {
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,

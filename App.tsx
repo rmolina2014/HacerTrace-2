@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import TicketCard from './components/TicketCard';
@@ -32,6 +33,9 @@ function App() {
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  
+  // Image Viewer State
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Helpers
   const getPriorityColor = (p: Priority) => {
@@ -411,6 +415,7 @@ function App() {
                           ticket={ticket} 
                           onEdit={(t) => { setEditingTicket(t); setIsModalOpen(true); }}
                           onMove={handleMoveTicket}
+                          onViewImage={(img) => setSelectedImage(img)}
                        />
                      ))}
                      {col.items.length === 0 && (
@@ -459,6 +464,17 @@ function App() {
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-900">{ticket.title}</span>
                                             <span className="text-xs text-gray-500 truncate max-w-xs">{ticket.description}</span>
+                                            {ticket.attachments && ticket.attachments.length > 0 && (
+                                                <div className="flex gap-1 mt-1">
+                                                    {ticket.attachments.map((img, i) => (
+                                                        <img 
+                                                            key={i} src={img} alt="thumb" 
+                                                            className="w-5 h-5 rounded object-cover border border-gray-300 cursor-pointer" 
+                                                            onClick={() => setSelectedImage(img)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -506,6 +522,23 @@ function App() {
             </div>
         )}
       </main>
+
+      {/* Image Viewer Modal */}
+      {selectedImage && (
+        <div 
+            className="fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4 cursor-zoom-out"
+            onClick={() => setSelectedImage(null)}
+        >
+            <img 
+                src={selectedImage} 
+                alt="Full preview" 
+                className="max-w-full max-h-full object-contain rounded-md shadow-2xl"
+            />
+            <button className="absolute top-4 right-4 text-white opacity-75 hover:opacity-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+      )}
 
       {/* Modals */}
       <CreateTicketModal 

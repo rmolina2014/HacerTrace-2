@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Ticket, Priority, Status, User } from '../types';
 
 interface CreateTicketModalProps {
@@ -27,10 +28,12 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     priority: Priority.Medium,
     status: Status.Pending,
     assignee: '',
-    project: projects[0] || ''
+    project: projects[0] || '',
+    attachments: []
   });
 
   const [availableModules, setAvailableModules] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update modules when project changes
   useEffect(() => {
@@ -58,7 +61,8 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         priority: Priority.Medium,
         status: Status.Pending,
         assignee: '',
-        project: defaultProject
+        project: defaultProject,
+        attachments: []
       });
     }
   }, [initialData, isOpen, projects]);
@@ -71,10 +75,38 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     onClose();
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (reader.result) {
+            setFormData(prev => ({
+              ...prev,
+              attachments: [...(prev.attachments || []), reader.result as string]
+            }));
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: (prev.attachments || []).filter((_, i) => i !== index)
+    }));
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0">
           <h2 className="text-lg font-bold text-gray-800">
             {initialData ? 'Editar Incidencia' : 'Nueva Incidencia'}
           </h2>
@@ -83,7 +115,7 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
             <input 
@@ -158,6 +190,40 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes / Evidencia</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {formData.attachments && formData.attachments.map((img, idx) => (
+                <div key={idx} className="relative group w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
+                  <img src={img} alt="preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(idx)}
+                    className="absolute top-0 right-0 bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+              ))}
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-gray-400 hover:text-blue-500 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+              </button>
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+              className="hidden" 
+              multiple 
+              accept="image/*"
+            />
+            <p className="text-xs text-gray-400">Formatos: JPG, PNG, GIF. (Se recomienda usar imágenes ligeras)</p>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Asignado a</label>
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white text-gray-900"
@@ -170,8 +236,9 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               ))}
             </select>
           </div>
+        </form>
 
-          <div className="pt-4 flex justify-end space-x-3">
+        <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 shrink-0">
             <button 
               type="button" 
               onClick={onClose}
@@ -180,13 +247,13 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               Cancelar
             </button>
             <button 
-              type="submit" 
+              type="button" 
+              onClick={handleSubmit}
               className="px-4 py-2 bg-blue-600 rounded-md text-sm font-medium text-white hover:bg-blue-700 shadow-sm"
             >
               Guardar Incidencia
             </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { Ticket, Priority, Status, Module, User } from './types';
 
 export const INITIAL_PROJECTS = ['Cem-Muni9', 'MesaEntrad-Muni9'];
@@ -25,7 +26,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     description: 'No trae registros o paginación errónea en el listado general.',
     priority: Priority.Medium,
     status: Status.Pending,
-    createdAt: 'Feb-25'
+    createdAt: 'Feb-25',
+    attachments: []
   },
   {
     id: 'T-002',
@@ -36,7 +38,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     description: 'El modo noche afecta la legibilidad de las letras en la vista de ocupación.',
     priority: Priority.Low,
     status: Status.Pending,
-    createdAt: 'Feb-25'
+    createdAt: 'Feb-25',
+    attachments: []
   },
   {
     id: 'T-003',
@@ -47,7 +50,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     description: 'Agregar N° Comprobante, Año de Pago y Forma de Pago en pantalla de mantenimiento.',
     priority: Priority.High,
     status: Status.Pending,
-    createdAt: 'Feb-25'
+    createdAt: 'Feb-25',
+    attachments: []
   },
   {
     id: 'T-004',
@@ -59,7 +63,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     priority: Priority.Medium,
     status: Status.InProgress,
     assignee: 'Roberto',
-    createdAt: 'Mayo-25'
+    createdAt: 'Mayo-25',
+    attachments: []
   },
   {
     id: 'T-005',
@@ -70,7 +75,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     description: 'Generar contra-asiento/débito al anular.',
     priority: Priority.Medium,
     status: Status.Future,
-    createdAt: 'Mayo-25'
+    createdAt: 'Mayo-25',
+    attachments: []
   },
   {
     id: 'T-006',
@@ -82,7 +88,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     priority: Priority.Medium,
     status: Status.Testing,
     assignee: 'Roberto',
-    createdAt: 'Jun-25'
+    createdAt: 'Jun-25',
+    attachments: []
   },
   {
     id: 'T-007',
@@ -93,7 +100,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     description: 'Figura pago 2023 en un mausoleo que no debería tenerlo acreditado.',
     priority: Priority.High,
     status: Status.Testing,
-    createdAt: 'Jun-25'
+    createdAt: 'Jun-25',
+    attachments: []
   },
   {
     id: 'T-008',
@@ -105,7 +113,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     priority: Priority.Medium,
     status: Status.Done,
     assignee: 'Roberto',
-    createdAt: 'Ago-25'
+    createdAt: 'Ago-25',
+    attachments: []
   },
   {
     id: 'T-009',
@@ -117,7 +126,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     priority: Priority.High,
     status: Status.Done,
     assignee: 'Roberto',
-    createdAt: 'Ago-25'
+    createdAt: 'Ago-25',
+    attachments: []
   },
   {
     id: 'T-010',
@@ -129,7 +139,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     priority: Priority.High,
     status: Status.Done,
     assignee: 'Roberto',
-    createdAt: 'Nov-25'
+    createdAt: 'Nov-25',
+    attachments: []
   },
   {
     id: 'T-011',
@@ -141,7 +152,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     priority: Priority.High,
     status: Status.Done,
     assignee: 'Roberto',
-    createdAt: 'Nov-25'
+    createdAt: 'Nov-25',
+    attachments: []
   },
   {
     id: 'T-012',
@@ -152,7 +164,8 @@ export const INITIAL_TICKETS: Ticket[] = [
     description: 'Permitir cargar factura de ARCA posterior a la venta.',
     priority: Priority.Medium,
     status: Status.Pending,
-    createdAt: 'Nov-25'
+    createdAt: 'Nov-25',
+    attachments: []
   }
 ];
 
